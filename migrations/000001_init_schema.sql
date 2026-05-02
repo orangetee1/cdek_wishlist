@@ -1,0 +1,36 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS users (
+	id BIGSERIAL PRIMARY KEY,
+	email TEXT NOT NULL UNIQUE,
+	password_hash TEXT NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS wishlists (
+	id BIGSERIAL PRIMARY KEY,
+	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	name TEXT NOT NULL,
+	description TEXT NOT NULL DEFAULT '',
+	event_date TIMESTAMPTZ,
+	token TEXT NOT NULL UNIQUE,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS items (
+	id BIGSERIAL PRIMARY KEY,
+	wishlist_id BIGINT NOT NULL REFERENCES wishlists(id) ON DELETE CASCADE,
+	name TEXT NOT NULL,
+	description TEXT NOT NULL DEFAULT '',
+	link TEXT NOT NULL DEFAULT '',
+	desire_degree INTEGER NOT NULL DEFAULT 0,
+	booked BOOLEAN NOT NULL DEFAULT FALSE,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_wishlists_user_id ON wishlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_items_wishlist_id ON items(wishlist_id);
++
++-- +goose Down
++DROP TABLE IF EXISTS items;
++DROP TABLE IF EXISTS wishlists;
++DROP TABLE IF EXISTS users;
